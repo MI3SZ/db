@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Pedidos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background-color: #0f172a; color: #f1f5f9; }
+    .status-aprovado { color: #22c55e; font-weight: bold; }
+    .status-pendente { color: #facc15; font-weight: bold; }
+    .status-rejeitado { color: #ef4444; font-weight: bold; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-8">
+  <h1 class="text-3xl font-bold mb-6">📦 Painel de Pedidos</h1>
+
+  <div class="w-11/12 max-w-5xl bg-slate-800 rounded-2xl shadow-lg p-6">
+    <table class="w-full text-sm text-left border-collapse">
+      <thead class="text-slate-300 border-b border-slate-700">
+        <tr>
+          <th class="p-3">ID</th>
+          <th class="p-3">Cliente</th>
+          <th class="p-3">Bandeira</th>
+          <th class="p-3">Endereço</th>
+          <th class="p-3">Status</th>
+          <th class="p-3">Data</th>
+        </tr>
+      </thead>
+      <tbody id="orders-body"></tbody>
+    </table>
+  </div>
+
+  <p id="status" class="mt-4 text-slate-400 text-sm">Atualizando...</p>
+
+  <script>
+    async function carregarPedidos() {
+      const status = document.getElementById("status");
+      const tbody = document.getElementById("orders-body");
+      try {
+        const res = await fetch("/api/orders");
+        const data = await res.json();
+        tbody.innerHTML = "";
+
+        data.forEach(pedido => {
+          const tr = document.createElement("tr");
+          tr.classList.add("border-b", "border-slate-700", "hover:bg-slate-700/30");
+
+          tr.innerHTML = `
+            <td class="p-3">${pedido.id}</td>
+            <td class="p-3">${pedido.card_holder}</td>
+            <td class="p-3">${pedido.card_brand}</td>
+            <td class="p-3">${pedido.address_line}</td>
+            <td class="p-3 ${pedido.status.toLowerCase() === "aprovado" ? "status-aprovado" :
+                             pedido.status.toLowerCase() === "pendente" ? "status-pendente" :
+                             "status-rejeitado"}">${pedido.status}</td>
+            <td class="p-3">${new Date(pedido.created_at).toLocaleString("pt-BR")}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+
+        status.textContent = `Última atualização: ${new Date().toLocaleTimeString()}`;
+      } catch (err) {
+        status.textContent = "Erro ao atualizar dados.";
+        console.error(err);
+      }
+    }
+
+    carregarPedidos();
+    setInterval(carregarPedidos, 5000);
+  </script>
+</body>
+</html>
