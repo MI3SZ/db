@@ -66,7 +66,7 @@ func main() {
 	http.Handle("/", http.FileServer(http.Dir("./static")))
 	http.HandleFunc("/api/orders", OrdersHandler)
 
-	port := ":8081"
+	port := ":8080"
 	log.Printf("🌍 Servidor rodando em http://localhost%s", port)
 	log.Fatal(http.ListenAndServe(port, nil))
 }
